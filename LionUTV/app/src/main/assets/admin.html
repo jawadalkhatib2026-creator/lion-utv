@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lion UTV Admin</title>
+<style>
+:root{--bg:#140B06;--panel:#24160C;--gold:#E8A317;--amber:#F5B83D;--orange:#C8651B;--cream:#FFF1D6;--muted:#C9A978;--red:#E5484D;--green:#7BD88F}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% -10%,#3b2111,#140B06 60%);color:var(--cream);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+h1{color:var(--amber);margin:8px 0 2px;font-size:26px}
+h2{color:var(--amber);font-size:18px;margin:0 0 10px}
+.sub{color:var(--muted);margin-bottom:14px}
+.card{background:var(--panel);border:1px solid #4a2c14;border-radius:14px;padding:14px;margin-bottom:14px}
+input,select,textarea{width:100%;background:#120a05;color:var(--cream);border:1px solid #6b3a18;border-radius:10px;padding:11px;font-size:16px;margin:4px 0 8px}
+textarea{min-height:90px}
+button{background:linear-gradient(90deg,var(--amber),var(--orange));color:#140B06;border:0;border-radius:10px;padding:11px 16px;font-weight:700;font-size:15px}
+button.sec{background:#3a2412;color:var(--cream);border:1px solid #6b3a18}
+button.red{background:var(--red);color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1;min-width:120px}
+.item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid #3a2412}
+.item:last-child{border:0}
+.item small{color:var(--muted);display:block}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{flex:1}
+.tabs button.on{outline:2px solid var(--cream)}
+.msg{padding:10px;border-radius:10px;margin-bottom:12px;display:none}
+.msg.ok{display:block;background:#173a21;color:var(--green)}
+.msg.err{display:block;background:#4a1a1d;color:#ffb3b6}
+.hide{display:none}
+.logo{font-size:44px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">🦁</div>
+  <h1 style="text-align:center">LION UTV</h1>
+  <div class="sub" style="text-align:center">Admin panel · لوحة المدير</div>
+  <div id="msg" class="msg"></div>
+
+  <div id="login" class="card">
+    <h2>Admin code · كود المدير</h2>
+    <input id="code" type="password" inputmode="numeric" placeholder="••••••" autocomplete="off">
+    <button onclick="login()" style="width:100%">Sign in · دخول</button>
+  </div>
+
+  <div id="app" class="hide">
+    <div class="tabs">
+      <button class="sec on" data-t="t-add" onclick="tab(this)">Channels</button>
+      <button class="sec" data-t="t-import" onclick="tab(this)">M3U</button>
+      <button class="sec" data-t="t-users" onclick="tab(this)">Users</button>
+      <button class="sec" data-t="t-list" onclick="tab(this)">List</button>
+      <button class="sec" data-t="t-admin" onclick="tab(this)">Admin</button>
+    </div>
+
+    <div id="t-add" class="card tab">
+      <h2>Add channel · إضافة قناة</h2>
+      <input id="c-name" placeholder="Name · الاسم">
+      <input id="c-url" placeholder="Stream URL (http://… .m3u8 / .ts) · رابط البث" autocapitalize="off">
+      <input id="c-group" placeholder="Category · التصنيف (e.g. Sports)">
+      <input id="c-logo" placeholder="Logo URL (optional)" autocapitalize="off">
+      <select id="c-type"><option value="LIVE">Live TV</option><option value="MOVIE">Movie</option><option value="SERIES">Series</option></select>
+      <button onclick="addChannel()" style="width:100%">Add · إضافة</button>
+    </div>
+
+    <div id="t-import" class="card tab hide">
+      <h2>Free public channels · قنوات عامة مجانية</h2>
+      <div class="row" style="margin-bottom:14px">
+        <button class="sec" onclick="free('index')">Everything</button>
+        <button class="sec" onclick="free('languages/ara')">Arabic</button>
+        <button class="sec" onclick="free('countries/jo')">Jordan</button>
+        <button class="sec" onclick="free('categories/movies')">Movies</button>
+        <button class="sec" onclick="free('categories/series')">Series</button>
+        <button class="sec" onclick="free('categories/sports')">Sports</button>
+        <button class="sec" onclick="free('categories/news')">News</button>
+        <button class="sec" onclick="free('categories/kids')">Kids</button>
+      </div>
+      <h2>Import M3U playlist · استيراد قائمة M3U</h2>
+      <input id="m-url" placeholder="Playlist link http://…/playlist.m3u" autocapitalize="off">
+      <button onclick="importUrl()" style="width:100%">Import from link · استيراد من رابط</button>
+      <div style="height:12px"></div>
+      <textarea id="m-text" placeholder="…or paste the M3U text here"></textarea>
+      <button class="sec" onclick="importText()" style="width:100%">Import pasted text</button>
+    </div>
+
+    <div id="t-users" class="card tab hide">
+      <h2>Add user code · إضافة مستخدم</h2>
+      <input id="u-name" placeholder="Name · الاسم">
+      <div class="row">
+        <input id="u-code" inputmode="numeric" placeholder="Code (empty = random)">
+        <input id="u-days" inputmode="numeric" placeholder="Days (0 = unlimited)" value="30">
+      </div>
+      <button onclick="addUser()" style="width:100%">Create · إنشاء</button>
+      <h2 style="margin-top:18px">Users · المستخدمون</h2>
+      <div id="users"></div>
+    </div>
+
+    <div id="t-list" class="card tab hide">
+      <h2>Channels · القنوات <span id="count" style="color:var(--muted)"></span></h2>
+      <input id="filter" placeholder="Search…" oninput="renderChannels()">
+      <div id="channels"></div>
+    </div>
+
+    <div id="t-admin" class="card tab hide">
+      <h2>Change admin code · تغيير كود المدير</h2>
+      <input id="a-code" type="password" inputmode="numeric" placeholder="New code (4+ digits)">
+      <button onclick="setAdmin()" style="width:100%">Change · تغيير</button>
+      <h2 style="margin-top:20px">Danger zone</h2>
+      <button class="red" onclick="clearAll()" style="width:100%">Delete all channels</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let token = "";
+let state = {channels: [], users: [], count: 0};
+const $ = id => document.getElementById(id);
+
+function show(text, ok) {
+  const m = $("msg");
+  m.className = "msg " + (ok ? "ok" : "err");
+  m.textContent = text;
+  window.scrollTo(0, 0);
+}
+
+async function api(path, body) {
+  body = body || {};
+  body.token = token;
+  const r = await fetch(path, {method: "POST", headers: {"Content-Type": "text/plain"}, body: JSON.stringify(body)});
+  const j = await r.json();
+  if (!j.ok) {
+    if (j.error === "auth") { location.reload(); }
+    throw new Error(j.error || "error");
+  }
+  return j;
+}
+
+async function login() {
+  try {
+    const j = await api("/api/login", {code: $("code").value.trim()});
+    token = j.token;
+    $("login").classList.add("hide");
+    $("app").classList.remove("hide");
+    $("msg").className = "msg";
+    await refresh();
+  } catch (e) { show(e.message, false); }
+}
+$("code").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+function tab(btn) {
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("on"));
+  btn.classList.add("on");
+  document.querySelectorAll(".tab").forEach(t => t.classList.add("hide"));
+  $(btn.dataset.t).classList.remove("hide");
+}
+
+async function refresh() {
+  state = await api("/api/state");
+  $("count").textContent = "(" + state.count + ")";
+  renderUsers();
+  renderChannels();
+}
+
+function row(title, sub, btns) {
+  const d = document.createElement("div");
+  d.className = "item";
+  const l = document.createElement("div");
+  const t = document.createElement("div");
+  t.textContent = title;
+  const s = document.createElement("small");
+  s.textContent = sub;
+  l.appendChild(t); l.appendChild(s);
+  d.appendChild(l);
+  const r = document.createElement("div");
+  r.className = "row";
+  r.style.flex = "none";
+  btns.forEach(b => {
+    const x = document.createElement("button");
+    x.textContent = b[0];
+    x.className = b[2] || "sec";
+    x.style.minWidth = "0";
+    x.onclick = b[1];
+    r.appendChild(x);
+  });
+  d.appendChild(r);
+  return d;
+}
+
+function renderUsers() {
+  const box = $("users");
+  box.textContent = "";
+  if (!state.users.length) { box.textContent = "No users yet."; return; }
+  state.users.forEach(u => {
+    const exp = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString() : "no expiry";
+    const expired = u.expiresAt && u.expiresAt < Date.now();
+    const st = !u.enabled ? "DISABLED" : (expired ? "EXPIRED" : "active");
+    box.appendChild(row(u.name + " · " + u.code, st + " · " + exp, [
+      [u.enabled ? "Off" : "On", () => act("/api/toggleUser", {code: u.code})],
+      ["+30d", () => act("/api/renewUser", {code: u.code, days: 30})],
+      ["Del", () => { if (confirm("Delete user?")) act("/api/removeUser", {code: u.code}); }, "red"]
+    ]));
+  });
+}
+
+function renderChannels() {
+  const box = $("channels");
+  box.textContent = "";
+  const q = $("filter").value.toLowerCase();
+  const list = state.channels.filter(c => !q || c.name.toLowerCase().includes(q) || c.group.toLowerCase().includes(q)).slice(0, 300);
+  list.forEach(c => {
+    box.appendChild(row(c.name, c.group + " · " + c.type, [
+      ["Del", () => act("/api/removeChannel", {id: c.id}), "red"]
+    ]));
+  });
+  if (state.count > 1500) {
+    const n = document.createElement("div");
+    n.className = "sub";
+    n.textContent = "Showing the first matches only (" + state.count + " channels in total).";
+    box.appendChild(n);
+  }
+}
+
+async function act(path, body, okText) {
+  try {
+    const j = await api(path, body);
+    if (okText) show(okText(j), true);
+    await refresh();
+    return j;
+  } catch (e) { show(e.message, false); }
+}
+
+async function addChannel() {
+  const j = await act("/api/addChannel", {
+    name: $("c-name").value, url: $("c-url").value, group: $("c-group").value,
+    logo: $("c-logo").value, type: $("c-type").value
+  }, j => j.added ? "Channel added ✓" : "Already exists");
+  if (j && j.added) { $("c-name").value = ""; $("c-url").value = ""; }
+}
+
+async function importUrl() {
+  show("Importing… this can take a minute for big playlists", true);
+  await act("/api/importM3u", {url: $("m-url").value}, j => "Added " + j.added + " channels ✓");
+}
+
+async function free(p) {
+  show("Importing… please wait", true);
+  await act("/api/importM3u", {url: "https://iptv-org.github.io/iptv/" + p + ".m3u"}, j => "Added " + j.added + " channels ✓");
+}
+
+async function importText() {
+  await act("/api/importM3u", {text: $("m-text").value}, j => "Added " + j.added + " channels ✓");
+}
+
+async function addUser() {
+  const j = await act("/api/addUser", {
+    name: $("u-name").value, code: $("u-code").value, days: parseInt($("u-days").value || "0", 10)
+  }, j => "User created. Code: " + j.code);
+  if (j) { $("u-name").value = ""; $("u-code").value = ""; }
+}
+
+async function setAdmin() {
+  try {
+    await api("/api/setAdminCode", {code: $("a-code").value.trim()});
+    alert("Admin code changed. Please sign in again.");
+    location.reload();
+  } catch (e) { show(e.message, false); }
+}
+
+function clearAll() {
+  if (confirm("Delete ALL channels?")) act("/api/clearChannels", {}, () => "All channels deleted");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Lion" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@drawable/bg_lion</item>
+        <item name="android:colorAccent">#E8A317</item>
+        <item name="android:colorPrimary">#8A3B12</item>
+        <item name="android:colorPrimaryDark">#140B06</item>
+        <item name="android:statusBarColor">#140B06</item>
+        <item name="android:navigationBarColor">#140B06</item>
+    </style>
+</resources>
